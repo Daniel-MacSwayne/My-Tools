@@ -8,8 +8,8 @@ import math
 import numpy as np
 import numba
 import sympy as sy
-from scipy.integrate import quad
-from scipy import optimize
+import scipy.integrate as spint
+import scipy.optimize as spopt
 from scipy.misc import derivative
 import matplotlib.pyplot as plt
 import time as pytime
@@ -20,16 +20,6 @@ old_err_state = np.seterr(divide='raise')
 @numba.jit
 ###############################################################################
 # Trigonometry
-
-def Degrees(θ):
-    """Takes Angles in RADIANS and returns Angles in DEGREES"""
-    return np.rad2deg(θ)
-
-
-def Radians(θ):
-    """Takes Angles in DEGREES and returns Angles in RADIANS"""
-    return np.deg2rad(θ)
-
 
 def Deg(θ):
     """Takes Angles in RADIANS and returns Angles in DEGREES"""
@@ -71,23 +61,23 @@ def Arctan(Component):
     return Deg(np.arctan(Component))
 
 
-def Atan2(Y, X):
-    """Returns the Angle in DEGREES from the X Axis [0, 360]"""
-    if X == 0:
-        if Y == 0:
+def Atan2(y, x):
+    """Returns the Angle in DEGREES from the x [0, 360]"""
+    if x == 0:
+        if y == 0:
             θ = 0
-        elif Y > 0:
+        elif y > 0:
             θ = 90
-        elif Y < 0:
+        elif y < 0:
             θ = -90
-    elif X > 0 and Y >= 0:
-        θ = Arctan(Y/X)
-    elif X > 0 and Y <= 0:
-        θ = Arctan(Y/X)
-    elif X < 0 and Y >= 0:
-        θ = 180 + Arctan(Y/X)
-    elif X < 0 and Y <= 0:
-        θ = Arctan(Y/X) - 180
+    elif x > 0 and y >= 0:
+        θ = Arctan(y/x)
+    elif x > 0 and y <= 0:
+        θ = Arctan(y/x)
+    elif x < 0 and y >= 0:
+        θ = 180 + Arctan(y/x)
+    elif x < 0 and y <= 0:
+        θ = Arctan(y/x) - 180
     return θ
 
 ###############################################################################
@@ -125,36 +115,36 @@ def Arctanh(x):
 ###############################################################################
 # Vector Operations
 
-def Mag(Vector):
+def Mag(v):
     """Returns the Magnitude of a Vector"""
-    return np.linalg.norm(np.array(Vector), axis=-1)
+    return np.linalg.norm(np.array(v), axis=-1)
 
 
-def Unit(Vector):
+def Unit(v):
     """Returns the Unit Vector"""
     try:
-        return np.array(Vector)/Mag(Vector)
+        return np.array(v)/Mag(v)
     except:
-        return np.zeros(len(Vector))
+        return np.zeros(len(v))
                       
 
-def DotProduct(Vector1, Vector2):
+def DotProduct(v_1, v_2):
     """Returns the Dot Product of two Vectors"""
-    return np.array(Vector1).dot(np.array(Vector2))
+    return np.array(v_1).dot(np.array(v_2))
 
 
-def CrossProduct(Vector1, Vector2):
+def CrossProduct(v_1, v_2):
     """Returns the Cross Product of two Vectors"""
-    np.array(Vector1, 'float64')
-    np.array(Vector2, 'float64')
-    return np.cross(Vector1, Vector2)
+    np.array(v_1, 'float64')
+    np.array(v_2, 'float64')
+    return np.cross(v_1, v_2)
 
 
-def VectorAngle(Vector1, Vector2):
+def VectorAngle(v_1, v_2):
     """Returns the smallest angle in DEGREES between two Vectors"""
-    Dot = DotProduct(Vector1, Vector2)
-    Mag1 = Mag(Vector1)
-    Mag2 = Mag(Vector2)
+    Dot = DotProduct(v_1, v_2)
+    Mag1 = Mag(v_1)
+    Mag2 = Mag(v_2)
     try:
         return Arccos(Dot/(Mag1*Mag2))
     except:
@@ -163,36 +153,36 @@ def VectorAngle(Vector1, Vector2):
 ###############################################################################
 # Matrix Operations
 
-def TransposeMatrix(Matrix):
+def TransposeMatrix(M):
     """Returns the Transposed Matrix"""
-    return np.transpose(np.array(Matrix))
+    return np.transpose(np.array(M))
 
 
-def MultiplyMatrix(Matrix1, Matrix2):
+def MultiplyMatrix(M_1, M_2):
     """Returns the Multiplication of two Matrices"""
-    return np.array(Matrix1).Dot(np.array(Matrix2))
+    return np.array(M_1).Dot(np.array(M_2))
 
 
-def DetMatrix(Matrix):
+def DetMatrix(M):
     """Returns the Determinant of a Matrix"""
-    return np.linalg.det(np.array(Matrix))
+    return np.linalg.det(np.array(M))
 
 
-def InverseMatrix(Matrix):
+def InverseMatrix(M):
     """Return the Inverse Matrix"""
     try:
-        return np.linalg.inv(np.array(Matrix))
+        return np.linalg.inv(np.array(M))
     except:
-        return np.array(Matrix)
+        return np.array(M)
 
 
-def EigenMatrix(Matrix):
+def EigenMatrix(M):
     """Returns the Eigen Values of a Matrix"""
     try:
-        S, V = np.linalg.eig(np.array(Matrix))
+        S, V = np.linalg.eig(np.array(M))
         return S, V
     except:
-        return np.zeros(len(Matrix))
+        return np.zeros(len(M))
 
 
 def RotateX(θ):
@@ -216,9 +206,9 @@ def RotateZ(θ):
     return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
 
 
-def ReflectInPlane(Vector):
+def ReflectInPlane(v):
     """Takes a Normal Vector of a Plane and returns the matrix that reflects in this plane"""
-    [a, b, c] = Unit(Vector)
+    [a, b, c] = Unit(v)
     A = np.array([[1 - 2*a**2, -2*a*b, -2*a*c],
                   [-2*a*b, 1 - 2*b**2, -2*b*c],
                   [-2*a*c, -2*b*c, 1 - 2*c**2]])
@@ -227,19 +217,19 @@ def ReflectInPlane(Vector):
 ###############################################################################
 # Quarternions Operations
 
-def AxisAngle_Q(Axis, θ):
+def AxisAngle_Q(a, θ):
     """Takes an Axis and an Angle and returns a Quarternion"""
     Q = np.zeros(4)
     Q[0] = Cos(θ/2)
-    Q[1:] = Unit(Axis)
+    Q[1:] = Unit(a)
     return Q
 
 
 def Q_AxisAngle(Q):
     """Takes a Quarternion and returns an Axis and an Angle """
-    Axis = Unit(Q[1:])    
+    a = Unit(Q[1:])    
     θ = 2*Arccos(Q[0])
-    return [Axis, θ]
+    return [a, θ]
 
     
 def ConjugateQ(Q):
@@ -249,16 +239,16 @@ def ConjugateQ(Q):
 
 def MultiplyQ(Q1, Q2):
     """Multiplies two Quarternions"""
-    W = Q1[0]*Q2[0] - Q1[1]*Q2[1] - Q1[2]*Q2[2] - Q1[3]*Q2[3]
-    X = Q1[0]*Q2[1] + Q1[1]*Q2[0] + Q1[2]*Q2[3] - Q1[3]*Q2[2]
-    Y = Q1[0]*Q2[2] + Q1[2]*Q2[0] + Q1[3]*Q2[1] - Q1[1]*Q2[3]
-    Z = Q1[0]*Q2[3] + Q1[3]*Q2[0] + Q1[1]*Q2[2] - Q1[2]*Q2[1]
-    return np.array([W, X, Y, Z])
+    w = Q1[0]*Q2[0] - Q1[1]*Q2[1] - Q1[2]*Q2[2] - Q1[3]*Q2[3]
+    x = Q1[0]*Q2[1] + Q1[1]*Q2[0] + Q1[2]*Q2[3] - Q1[3]*Q2[2]
+    y = Q1[0]*Q2[2] + Q1[2]*Q2[0] + Q1[3]*Q2[1] - Q1[1]*Q2[3]
+    z = Q1[0]*Q2[3] + Q1[3]*Q2[0] + Q1[1]*Q2[2] - Q1[2]*Q2[1]
+    return np.array([w, x, y, z])
 
 
-def RotateVectorQ(Vector, Q):
+def RotateVectorQ(v, Q):
     """Rotates a Vector with a Quarternion Q.V.Q*"""
-    V = np.append([0], Vector)
+    V = np.append([0], v)
     return MultiplyQ(MultiplyQ(Q, V), ConjugateQ(Q))[1:]
 
 ###############################################################################
@@ -272,20 +262,7 @@ def Differentiate(Function, Point, dx=1e-12):
 
 def Integrate(Function, Start, End):
     """Takes a Function and Intergrates between an Interval""" 
-    I, ERROR = quad(Function, Start, End)
-    
-    # if type(Start + 0.0) == float and type(End + 0.0) == float:
-    #     I, ERROR = quad(Function, Start, End)
-    #     return I
-    # elif type(Start) == np.ndarray or type(End) == np.ndarray:
-    #     N = len(Start + End)    # Will flag an error if not same length array but not if only one is float
-    #     I_s = np.zeros(N)
-    #     # ERROR_s = np.zeros(N)
-    #     for i in range(N):
-    #         I, ERROR = quad(Function, Start, End)
-    #         I_s[i] = I
-    #         # ERROR_s[i] = ERROR
-    #     return 
+    I, ERROR = spint.quad(Function, Start, End)
     return I
 
 
@@ -293,7 +270,7 @@ def RK4_Integrator(f, y_0, t_0, dt, T):
     """Takes a function, f, to be integrated, an initial state vector y_0,
     an initial time t_0, a timestep dt. It then computes iterations of an 
     RK4 integration up to t=T. Returns the State Vector and Time lists"""    
-    def RK4_step(f, y, t, dt):
+    def RK4_Step(f, y, t, dt):
         """Performs 1 iteration of the RK4 algorithm."""
         k_1 = dt*f(y, t)                     # Coefficients of Integration
         k_2 = dt*f(y + k_1/2, t + dt/2)
@@ -315,14 +292,14 @@ def RK4_Integrator(f, y_0, t_0, dt, T):
     for I in range(1, I + 1):         # Loop Iterations
         y = y_s[I - 1]
         t = t_s[I - 1]
-        y_s[I] = RK4_step(f, y, t, dt)            # Update State Vector
+        y_s[I] = RK4_Step(f, y, t, dt)            # Update State Vector
         t_s[I] = t + dt                           # Update Time
     return y_s, t_s
 
 
 def Optimize(Function, Start):
     """Finds a value of the Function that returns 0. Uses Newton Raphson with a Start point"""
-    Root = optimize.newton(Function, Start)
+    Root = spopt.newton(Function, Start)
     return Root
 
 ###############################################################################
@@ -348,11 +325,11 @@ def Relu(x):
     return max(x, 0)
 
 
-def LinearInterpolation(Xactual, Xlower, Xupper, Ylower, Yupper):
+def LinearInterpolation(x_actual, x_lower, x_upper, y_lower, y_upper):
     """Takes known points on a line and finds linearly interpolated point on the line connecting the known points""" 
-    f = (Xactual - Xlower)/(Xupper - Xlower)
-    Yinterpolate = (Yupper - Ylower)*f + Ylower
-    return Yinterpolate
+    f = (x_actual - x_lower)/(x_upper - x_lower)
+    y_interpolate = (y_upper - y_lower)*f + y_lower
+    return y_interpolate
 
 
 def BestFitLine(x_s, y_s, Order=1):
@@ -443,16 +420,16 @@ def CreatePlot(Size=(6, 6), Dim=2):
     return Figure, Axes
 
 
-def PlotXY(X_s, Y_s):
+def PlotXY(x_s, y_s):
     Figure, Axes = CreatePlot()
-    Axes.plot(X_s, Y_s, color='black')
+    Axes.plot(x_s, y_s, color='black')
     return Figure, Axes
 
 
-# def AnimateXY(X_s, Y_s, Trail, Sample, FPS=50):
-#     if np.shape(X_s) != np.shape(Y_s):
+# def AnimateXY(x_s, y_s, Trail, Sample, FPS=50):
+#     if np.shape(x_s) != np.shape(y_s):
 #         raise TypeError
-#     I_s = list(range(len(X_s)))
+#     I_s = list(range(len(x_s)))
 #     for I in I_s:
 #         x_s = 
     
