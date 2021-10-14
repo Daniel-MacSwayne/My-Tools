@@ -1,9 +1,8 @@
 import os, sys
-
 GitHub = os.environ['USERPROFILE'] + '\OneDrive\GitHub'
-
 sys.path = sorted(set(sys.path + [GitHub + '\My Tools\General']))
-from Maths import *
+sys.path = sorted(set(sys.path + [GitHub + '\My Tools\Astronomy']))
 
-sys.path = sorted(list(set(sys.path + [GitHub + 'My Tools\Astronomy'])))
+from Maths import *
+from Constants import *
 from Astronomy import *

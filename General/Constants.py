@@ -24,6 +24,7 @@ eV_J = 1.6e-19           # Scale Electron Volts to Joules
 # Universal Physics
 G = 6.6743e-11      # Gravitational Constant. m3.kg-1.s-2
 σ = 5.670374419e-8      # Stefan Boltzmann Constant. kg.s-3.K-4
+c_ = 299792458       # Speed of Light in Vacuum. m.s^-1 
 
 # Gas Dynamics
 k_b = 1.380649e-23      # Boltzmann Constant. J.K-1

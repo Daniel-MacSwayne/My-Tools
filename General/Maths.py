@@ -6,6 +6,7 @@
 
 import math
 import numpy as np
+import pandas as pd
 import numba
 import sympy as sy
 import scipy.integrate as spint
