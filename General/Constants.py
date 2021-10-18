@@ -16,7 +16,7 @@ import math
 C_K = 273.15    # Offset Celcius to Kelvin
 AU_m = 1.495978707e11     # Scale Astronomical Units to meters
 psi_pa = 6894.76        # Scale Pounds per Square Inch to Pascals
-bar_pa = 101325         # Scale bar to Pascals
+bar_pa = 1e5         # Scale bar to Pascals
 lbs_kg = 1/2.2            # Scale Pounds to Kilograms
 inch_m = 2.54e-2        # Scale Inches to Meters
 eV_J = 1.6e-19           # Scale Electron Volts to Joules
