@@ -5,7 +5,6 @@ sys.path = sorted(set(sys.path + [GitHub + '\My Tools\Astronomy']))
 
 from Maths import *
 from Constants import *
-from Astronomy import *
 import time
 
 ###############################################################################
@@ -175,7 +174,6 @@ def Transfer(r1, r2, Planet, Output):
     τ2 = 2*math.pi*(r2**3/μ)**0.5
     τT = math.pi*((0.5*(r1+r2))**3/μ)**0.5
     Angle = 180 - 360*τT/τ2
-    #DeltaV1=4 τT=8  Angle=9
     return [v1, v2, vp, va, ΔV1, ΔV2, τ1, τ2, τT, Angle][Output] 
 
 
