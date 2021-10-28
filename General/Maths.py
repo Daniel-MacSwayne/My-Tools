@@ -20,6 +20,30 @@ old_err_state = np.seterr(divide='raise')
 
 @numba.jit
 ###############################################################################
+# Plotting
+
+def CreatePlot(Size=(6, 6), Dim=2):
+    Figure = plt.figure(figsize=Size)
+    if Dim == 2:
+        Axes = Figure.gca()
+    elif Dim == 3:
+        Axes = Figure.add_subplot(111, projection='3d')
+    return Figure, Axes
+
+
+def Plot_Function(f, I, x_axis=True):
+    x_s = np.linspace(I[0], I[1], 101)
+    y_s = f(x_s)
+    Figure, Axes = CreatePlot()
+    Axes.plot(x_s, y_s, color='blue', label='y = f(x)')
+    if x_axis == True:
+        Axes.plot([I[0], I[1]], [0, 0], '--', color='black')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.legend()
+    return Figure, Axes
+
+###############################################################################
 # Trigonometry
 
 def Deg(θ):
@@ -297,11 +321,89 @@ def RK4_Integrator(f, y_0, t_0, dt, T):
         t_s[I] = t + dt                           # Update Time
     return y_s, t_s
 
+###############################################################################
 
 def Optimize(Function, Start):
     """Finds a value of the Function that returns 0. Uses Newton Raphson with a Start point"""
     Root = spopt.newton(Function, Start)
     return Root
+
+
+def Bisection(f, I, n=100, Plot=False):
+    [x_l0, x_r0] = I
+    x_l, x_r = x_l0, x_r0
+    
+    if f(x_l) * f(x_r) > 0:
+        print('No Roots Detected within given I. Could be an even number of Roots.')
+        return
+    
+    xl_s = np.zeros(n)
+    xr_s = np.zeros(n)
+    xm_s = np.zeros(n)
+    
+    for i in range(n):
+        x_m = 0.5*(x_l + x_r)
+        
+        xl_s[i] = x_l
+        xr_s[i] = x_r
+        xm_s[i] = x_m
+
+        if f(x_m) < 0:
+            x_l = x_m
+        elif f(x_m) > 0:
+            x_r = x_m
+        
+            
+    yl_s = f(xl_s)
+    yl_s = f(xl_s)
+    
+    if Plot == True:
+        Figure, Axes = Plot_Function(f, I)
+        for i in range(n):
+            Axes.plot(xm_s, f(xm_s), 'o', color='red')
+
+    # return xl_s, xr_s, xm_s
+    return x_m
+
+
+def Iterative_g(f, x_0, n=100, Plot=False):
+    # def g(x):
+    #     return x - f(x)
+    def g(x):
+        return x + f(x)/13
+    
+    x_s = np.zeros(n + 1)
+    x_s[0] = x_0
+    
+    for i in range(n):
+        x_s[i + 1] = g(x_s[i])
+    
+    y_s = x_s.copy()
+    # y_s[0] = 0
+    y_s[0] = min(y_s)
+        
+    I = np.array([[min(x_s), max(x_s)], [min(y_s), max(y_s)]])
+    
+    s = x_s[-1]
+    
+    if Plot == True:
+        Figure1, Axes1 = Plot_Function(f, I[0])
+        
+        X_s = np.linspace(I[0][0], I[0][1], 101)
+        Y_s = g(X_s)      
+        Figure2, Axes2 = CreatePlot()
+        Axes2.plot(X_s, Y_s, color='red', label='y = g(x)')
+        Axes2.plot(X_s, X_s, color='blue', label='y = x')
+        
+        for i in range(n):
+            Axes2.plot([x_s[i], x_s[i]], [y_s[i], y_s[i + 1]], '--', color='black')
+            Axes2.plot([x_s[i], x_s[i + 1]], [y_s[i + 1], y_s[i + 1]], '--', color='black')
+        
+        plt.xlabel('x')
+        plt.ylabel('y') 
+        plt.legend()
+    
+    return x_s, y_s, I, s
 
 ###############################################################################
 # Laplace Operations
@@ -409,35 +511,6 @@ def Dijkstra(Network, Start, Target):
             pass
         
     return [TargetArcs, TargetLengths]
-
-###############################################################################
-
-def CreatePlot(Size=(6, 6), Dim=2):
-    Figure = plt.figure(figsize=Size)
-    if Dim == 2:
-        Axes = Figure.gca()
-    elif Dim == 3:
-        Axes = Figure.add_subplot(111, projection='3d')
-    return Figure, Axes
-
-
-def PlotXY(x_s, y_s):
-    Figure, Axes = CreatePlot()
-    Axes.plot(x_s, y_s, color='black')
-    return Figure, Axes
-
-
-# def AnimateXY(x_s, y_s, Trail, Sample, FPS=50):
-#     if np.shape(x_s) != np.shape(y_s):
-#         raise TypeError
-#     I_s = list(range(len(x_s)))
-#     for I in I_s:
-#         x_s = 
-    
-    
-    
-
-
 
 ###############################################################################
 
