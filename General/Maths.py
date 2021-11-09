@@ -6,6 +6,7 @@
 
 import math
 import numpy as np
+import scipy as sp
 import pandas as pd
 import numba
 import sympy as sy
@@ -22,6 +23,7 @@ old_err_state = np.seterr(divide='raise')
 # Plotting
 
 def CreatePlot(Size=(6, 6), Dim=2):
+    """Shortcut for creating a Matplotlib Figure and Axes"""
     Figure = plt.figure(figsize=Size)
     if Dim == 2:
         Axes = Figure.gca()
@@ -31,13 +33,16 @@ def CreatePlot(Size=(6, 6), Dim=2):
 
 
 def Plot_Function(f, I, x_Axis=False, y_Axis=False, Color='blue', Label='y = f(x)'):
+    """Plots a Function f across a Domain I"""
     x_s = np.linspace(I[0], I[1], 101)
     y_s = f(x_s)
+    
     Figure, Axes = CreatePlot()
     if x_Axis == True:
         Axes.plot([I[0], I[1]], [0, 0], '-', color='black')    
     elif y_Axis == False:
-        Axes.plot([[0, 0], I[0], I[1]], '-', color='black')    
+        Axes.plot([[0, 0], I[0], I[1]], '-', color='black')   
+    
     Axes.plot(x_s, y_s, color=Color, label=Label)
     plt.xlabel('x')
     plt.ylabel('y')
@@ -51,47 +56,47 @@ def Plot_Function(f, I, x_Axis=False, y_Axis=False, Color='blue', Label='y = f(x
 # Trigonometry
 
 def Deg(θ):
-    """Takes Angles in RADIANS and returns Angles in DEGREES"""
+    """Takes Angle θ in RADIANS and returns Angle in DEGREES. Compatible with Arrays."""
     return np.rad2deg(θ)
 
 
 def Rad(θ):
-    """Takes Angles in DEGREES and returns Angles in RADIANS"""
+    """Takes Angle θ in DEGREES and returns Angle in RADIANS. Compatible with Arrays."""
     return np.deg2rad(θ)
 
 
 def Sin(θ):
-    """Takes Angles in DEGREES and returns the Sines of the Angles"""
+    """Takes Angle θ in DEGREES and returns the Sine of the Angle. Compatible with Arrays."""
     return np.sin(Rad(θ))
 
 
 def Cos(θ):
-    """Takes Angles in DEGREES and returns the Cosines of the Angles"""
+    """Takes Angle θ in DEGREES and returns the Cosine of the Angle. Compatible with Arrays."""
     return np.cos(Rad(θ))
 
 
 def Tan(θ):
-    """Takes Angles in DEGREES and returns the Tangents of the Angles"""
+    """Takes Angle θ in DEGREES and returns the Tangent of the Angle. Compatible with Arrays."""
     return np.tan(Rad(θ))
 
 
-def Arcsin(Component):
-    """Takes the Sines of Angles and returns the Angles in DEGREES"""
-    return Deg(np.arcsin(Component))
+def Arcsin(x):
+    """Takes the Inverse Sine of the Trigonometric Ratio x and returns the Angle in DEGREES. Compatible with Arrays."""
+    return Deg(np.arcsin(x))
 
 
-def Arccos(Component):
-    """Takes the Cosines of Angles and returns the Angles in DEGREES"""
-    return Deg(np.arccos(Component))
+def Arccos(x):
+    """Takes the Inverse Cosine of the Trigonometric Ratio x and returns the Angle in DEGREES. Compatible with Arrays."""
+    return Deg(np.arccos(x))
 
 
-def Arctan(Component):
-    """Takes the Tangents of Angles and returns the Angles in DEGREES"""
-    return Deg(np.arctan(Component))
+def Arctan(x):
+    """Takes the Inverse Tangent of the Trigonometric Ratio x and returns the Angle in DEGREES. Compatible with Arrays."""
+    return Deg(np.arctan(x))
 
 
 def Atan2(y, x):
-    """Returns the Angle in DEGREES from the x [0, 360]"""
+    """Takes x and y components and returns the Angle from the x Axis in DEGREES. Output Domain [0, 360]."""
     if x == 0:
         if y == 0:
             θ = 0
@@ -113,39 +118,39 @@ def Atan2(y, x):
 # Hyperbolic Trigonometry
 
 def Sinh(x):
-    """Returns the Hyperbolic Sine of x"""
+    """Returns the Hyperbolic Sine of x. Compatible with Arrays."""
     return np.sinh(x)
 
 
 def Cosh(x):
-    """Returns the Hyperbolic Cosine of x"""
+    """Returns the Hyperbolic Cosine of x. Compatible with Arrays."""
     return np.cosh(x)
 
 
 def Tanh(x):
-    """Returns the Hyperbolic Tangent of x"""
+    """Returns the Hyperbolic Tangent of x. Compatible with Arrays."""
     return np.cosh(x)
 
 
 def Arcsinh(x):
-    """Returns the Inverse Hyperbolic Sine of x"""
+    """Returns the Inverse Hyperbolic Sine of x. Compatible with Arrays."""
     return np.arcsinh(x)
 
 
 def Arccosh(x):
-    """Returns the Inverse Hyperbolic Cosine of x"""
+    """Returns the Inverse Hyperbolic Cosine of x. Compatible with Arrays."""
     return np.arccosh(x)
 
 
 def Arctanh(x):
-    """Returns the Inverse Hyperbolic Tangent of x"""
+    """Returns the Inverse Hyperbolic Tangent of x. Compatible with Arrays."""
     return np.arctanh(x)
 
 ###############################################################################
 # Vector Operations
 
 def Mag(v):
-    """Returns the Magnitude of a Vector"""
+    """Returns the Magnitude of a Vector. Compatible with Arrays."""
     return np.linalg.norm(np.array(v), axis=-1)
 
 
@@ -215,21 +220,21 @@ def EigenMatrix(M):
 
 
 def RotateX(θ):
-    """Rotates a Vector Rotated about the X Axis by an Angle in DEGREES. +ACW"""
+    """Takes Angle θ in DEGREES and returns the Rotation Matrix about the x Axis. +ACW"""
     c = Cos(θ)
     s = Sin(θ)
     return np.array([[1, 0, 0], [0, c, -s], [0, s, c]])
 
 
 def RotateY(θ):
-    """Rotates a Vector Rotated about the Y Axis by an Angle in DEGREES. +ACW"""
+    """Takes Angle θ in DEGREES and returns the Rotation Matrix about the y Axis. +ACW"""
     c = Cos(θ)
     s = Sin(θ)
     return np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
 
 
 def RotateZ(θ):
-    """Rotates a Vector Rotated about the Z Axis by an Angle in DEGREES. +ACW"""
+    """Takes Angle θ in DEGREES and returns the Rotation Matrix about the z Axis. +ACW"""
     c = Cos(θ)
     s = Sin(θ)
     return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
@@ -244,16 +249,65 @@ def ReflectInPlane(v):
     return A
 
 
-def GaussSidel(A):
+def SolveLinearSystem(A, b, n=100, Method='J'):
+    """Takes a Matrix A and a Vector b and returns the solution x to the Linear System Ax=b."""
+    (r, c) = A.shape    # r is the number of equations. c is the number of variables
+    D = np.diag(A)
+    
+    # Re-Normalizing the System
+    A_ = A/D[:, None]
+    b_ = b/D
 
+    def Jacobi(A_, b_, n):
+        N = np.identity(r)
+        P = N - A_
+        M = np.linalg.inv(N).dot(P)
+        
+        x_s = np.zeros((n + 1, r))
+        x_s[0] = np.zeros(r)
+        
+        for i in range(1, n + 1):
+            x_s[i] = M.dot(x_s[i - 1]) + b_
+        
+        return x_s[-1], D, A_, b_, N, P, M, x_s
+    
+    
+    def GaussSidel(A_, b_, n):
+        A_L = np.tril(A_, -1)
+        A_U = np.triu(A_, 1)
+        N = np.identity(r) - A_L
+        P = A_U
+        M = np.linalg.inv(N).dot(P)
+        
+        x_s = np.zeros((n + 1, r))
+        x_s[0] = np.zeros(r)
+        
+        for i in range(1, n + 1):
+            x_s[i] = M.dot(x_s[i - 1]) + b_
+        
+        # for i in range(1, n + 1):
+            # for j in range(r):
+            #     print(x_s[i][j])
+            #     x_s[i][j] = A_L.dot(x_s[i])[j] + A_U.dot(x_s[i - 1])[j] + b_[j]
+    
+            # x_s[i] = A_L.dot(x_s[i]) + A_U.dot(x_s[i - 1]) + b_
+        
+        return x_s[-1], D, A_, b_, A_L, A_U, N, P, x_s 
 
-
+    if Method == 'J':
+        s = Jacobi(A_, b_, n)[0]
+        return s
+    
+    elif Method == 'GS':
+        s = GaussSidel(A_, b_, n)[0]
+        return s
+        
 
 ###############################################################################
 # Quarternions Operations
 
 def AxisAngle_Q(a, θ):
-    """Takes an Axis and an Angle and returns a Quarternion"""
+    """Takes an Axis and an Angle and returns the Quarternion"""
     Q = np.zeros(4)
     Q[0] = Cos(θ/2)
     Q[1:] = Unit(a)
@@ -338,6 +392,9 @@ def Optimize(Function, Start):
     """Finds a value of the Function that returns 0. Uses Newton Raphson with a Start point"""
     Root = spopt.newton(Function, Start)
     return Root
+
+
+def Solve
 
 
 def Bisection(f, I, n=100, Plot=False):
